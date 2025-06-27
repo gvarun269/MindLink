@@ -1,28 +1,36 @@
 import path from "path";
 import fs from "fs";
 
-const gameRooms = new Map(); // roomCode => gameData
-const availableCategories = ["Animals", "Cars", "Fruits", "Movies", "Places","Teams","Players","Foods","Sports","Cartoons"];
+// 👥 Active game state per room
+const gameRooms = new Map();
 
-// 🔁 Get random images from category
+// 🗂️ List of available categories (case-sensitive to folder names!)
+const availableCategories = [
+  "Animals", "Cars", "Fruits", "Movies", "Places",
+  "Teams", "Players", "Foods", "Sports", "Cartoons"
+];
+
+// 📸 Random image selection from assets
 function getRandomImages(category, count) {
   const categoryPath = path.join("assets", category);
-  const allImages = fs.readdirSync(categoryPath);
+  const allImages = fs.readdirSync(categoryPath).filter(f => f.endsWith(".jpg") || f.endsWith(".png"));
   const shuffled = allImages.sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
 }
 
+// 💣 Pick trap image
 function pickTrap(images) {
   return images[Math.floor(Math.random() * images.length)];
 }
 
+// 🔁 Get unused category
 function getNextCategory(used) {
   const unused = availableCategories.filter(cat => !used.includes(cat));
   if (unused.length === 0) return null;
   return unused[Math.floor(Math.random() * unused.length)];
 }
 
-// 🔁 Start new game session
+// 🚀 Start new game
 export function startGame(roomCode) {
   const category = getNextCategory([]);
   if (!category) return null;
@@ -46,16 +54,16 @@ export function startGame(roomCode) {
     finished: false
   });
 
-  startTimer(roomCode); // ✅ Start round timer
+  startTimer(roomCode); // ⏱️ Start first timer
 
   return {
     images: selectedImages,
     category,
-    trap: null // ⛔ Don't reveal trap to client
+    trap: null
   };
 }
 
-// 👥 Set initial players
+// 👤 Set players & initialize scores
 export function setPlayers(roomCode, players) {
   const room = gameRooms.get(roomCode);
   if (room) {
@@ -66,15 +74,16 @@ export function setPlayers(roomCode, players) {
   }
 }
 
-// 📥 Handle player choice
+// 📥 On player choice
 export function submitChoice(roomCode, playerName, imageName) {
   const room = gameRooms.get(roomCode);
   if (!room || room.finished) return;
 
   room.choices[playerName] = imageName;
 
+  // All players have chosen
   if (Object.keys(room.choices).length === room.players.length) {
-    clearTimeout(room.timer); // ⏹️ stop timer early
+    clearTimeout(room.timer);
     calculateRoundScore(roomCode);
     return true;
   }
@@ -100,14 +109,13 @@ function calculateRoundScore(roomCode) {
       } else if (players.length > 1) {
         room.scores[player] += players.length;
       }
-      // Solo picks = 0
     }
   }
 
   room.revealedChoices = Object.keys(choiceMap);
 }
 
-// ⏭ Move to next round or end game
+// ⏭️ Go to next round
 export function nextRound(roomCode) {
   const room = gameRooms.get(roomCode);
   if (!room || room.finished) return null;
@@ -135,7 +143,7 @@ export function nextRound(roomCode) {
   room.choices = {};
   room.revealedChoices = [];
 
-  startTimer(roomCode); // ⏱️ auto choice after 15s
+  startTimer(roomCode);
 
   return {
     round: room.round,
@@ -145,7 +153,7 @@ export function nextRound(roomCode) {
   };
 }
 
-// ⏱️ Auto-select after 15s
+// ⏱️ Fallback timer (auto select after 15s)
 function startTimer(roomCode) {
   const room = gameRooms.get(roomCode);
   if (!room) return;
@@ -164,10 +172,10 @@ function startTimer(roomCode) {
       trap: room.trap,
       choices: room.revealedChoices
     });
-  }, 15000); // 15s
+  }, 15000);
 }
 
-// 🧾 Current state of room
+// 📊 Get game state
 export function getGameState(roomCode) {
   const room = gameRooms.get(roomCode);
   if (!room) return null;
