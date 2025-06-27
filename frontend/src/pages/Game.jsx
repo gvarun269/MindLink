@@ -6,8 +6,8 @@ import "./Game.css";
 export default function Game() {
   const [images, setImages] = useState([]);
   const [selected, setSelected] = useState(null);
-  const [timer, setTimer] = useState(10);
-  const [round, setRound] = useState(0);
+  const [timer, setTimer] = useState(15);
+  const [round, setRound] = useState(1);
   const [reveal, setReveal] = useState(false);
   const [trap, setTrap] = useState(null);
   const [choices, setChoices] = useState({});
@@ -38,7 +38,7 @@ export default function Game() {
       setCategory(category);
       setReveal(false);
       setSelected(null);
-      setTimer(2);
+      setTimer(15);
     });
 
     socket.on("new-round", ({ round, images, category }) => {

@@ -164,7 +164,7 @@ function startTimer(roomCode) {
       trap: room.trap,
       choices: room.revealedChoices
     });
-  }, 10000); // 10s
+  }, 15000); // 15s
 }
 
 // 🧾 Current state of room
