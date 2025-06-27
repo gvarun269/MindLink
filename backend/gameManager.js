@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 
 const gameRooms = new Map(); // roomCode => gameData
-const availableCategories = ["animals", "cars", "fruits", "movies", "places"];
+const availableCategories = ["Animals", "Cars", "Fruits", "Movies", "Places","Teams","Players","Foods","Sports","Cartoons"];
 
 // 🔁 Get random images from category
 function getRandomImages(category, count) {
@@ -112,7 +112,7 @@ export function nextRound(roomCode) {
   const room = gameRooms.get(roomCode);
   if (!room || room.finished) return null;
 
-  if (room.round >= 5) {
+  if (room.round >= 10) {
     room.finished = true;
     return { finished: true, scores: room.scores };
   }
@@ -164,7 +164,7 @@ function startTimer(roomCode) {
       trap: room.trap,
       choices: room.revealedChoices
     });
-  }, 15000); // 15s
+  }, 10000); // 10s
 }
 
 // 🧾 Current state of room

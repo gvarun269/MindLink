@@ -57,7 +57,7 @@ export function registerSocketHandlers(io) {
 
       const { images, category } = game;
       io.to(roomCode).emit("game-started", {
-        round: 1,
+        round: 0,
         images,
         category,
       });
