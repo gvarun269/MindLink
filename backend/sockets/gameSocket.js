@@ -1,5 +1,4 @@
 // backend/sockets/gameSocket.js
-
 import {
   startGame,
   setPlayers,
@@ -11,27 +10,21 @@ import {
 const activeRooms = new Map();
 
 export function registerSocketHandlers(io) {
-  globalThis.io = io; // For use in timers
   io.on("connection", (socket) => {
     console.log(`🟢 Client connected: ${socket.id}`);
 
     // --- Create Room ---
     socket.on("create-room", ({ name, avatar }, callback) => {
       const roomCode = generateRoomCode();
-
       activeRooms.set(roomCode, {
         host: socket.id,
-        players: [{ name, socketId: socket.id, avatar }],
+        players: [{ name, socketId: socket.id, avatar }]
       });
 
       socket.join(roomCode);
       console.log(`🏠 Room ${roomCode} created by ${name}`);
       callback({ success: true, roomCode });
-
-      io.to(roomCode).emit("update-players", {
-        players: activeRooms.get(roomCode).players,
-        hostId: socket.id,
-      });
+      io.to(roomCode).emit("update-players", activeRooms.get(roomCode).players);
     });
 
     // --- Join Room ---
@@ -39,18 +32,14 @@ export function registerSocketHandlers(io) {
       const room = activeRooms.get(roomCode);
       if (!room) return callback({ success: false, message: "Room not found" });
 
-      const nameExists = room.players.some((p) => p.name === name);
+      const nameExists = room.players.some(p => p.name === name);
       if (nameExists) return callback({ success: false, message: "Name already taken" });
 
       room.players.push({ name, socketId: socket.id, avatar });
       socket.join(roomCode);
       console.log(`✅ ${name} joined room ${roomCode}`);
       callback({ success: true });
-
-      io.to(roomCode).emit("update-players", {
-        players: room.players,
-        hostId: room.host,
-      });
+      io.to(roomCode).emit("update-players", room.players);
     });
 
     // --- Start Game ---
@@ -60,7 +49,6 @@ export function registerSocketHandlers(io) {
 
       const players = room.players;
       setPlayers(roomCode, players);
-
       const game = startGame(roomCode);
       if (!game) {
         io.to(roomCode).emit("game-error", { message: "Failed to start game." });
@@ -75,7 +63,7 @@ export function registerSocketHandlers(io) {
       });
     });
 
-    // --- Submit Choice ---
+    // --- Player submits choice ---
     socket.on("submit-choice", ({ roomCode, name, image }) => {
       const isComplete = submitChoice(roomCode, name, image);
 
@@ -88,7 +76,7 @@ export function registerSocketHandlers(io) {
       }
     });
 
-    // --- Next Round ---
+    // --- Move to next round ---
     socket.on("next-round", (roomCode) => {
       const result = nextRound(roomCode);
       if (!result) return;
@@ -106,35 +94,30 @@ export function registerSocketHandlers(io) {
       }
     });
 
-    // --- Debug Sync ---
+    // --- Get game state (debug / sync) ---
     socket.on("get-state", (roomCode, cb) => {
       const state = getGameState(roomCode);
       cb(state);
     });
 
-    // --- Disconnect Handler ---
+    // --- Handle disconnect ---
     socket.on("disconnect", () => {
       console.log(`🔴 Disconnected: ${socket.id}`);
-
       for (let [roomCode, room] of activeRooms) {
-        const updatedPlayers = room.players.filter((p) => p.socketId !== socket.id);
-
+        const updatedPlayers = room.players.filter(p => p.socketId !== socket.id);
         if (updatedPlayers.length === 0) {
           activeRooms.delete(roomCode);
           console.log(`🗑️ Room ${roomCode} deleted (no players left)`);
         } else {
           room.players = updatedPlayers;
-          io.to(roomCode).emit("update-players", {
-            players: room.players,
-            hostId: room.host,
-          });
+          io.to(roomCode).emit("update-players", room.players);
         }
       }
     });
   });
 }
 
-// 🔑 Unique Room Code Generator
+// --- Utility: Unique Room Code Generator ---
 function generateRoomCode() {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let code = "";
