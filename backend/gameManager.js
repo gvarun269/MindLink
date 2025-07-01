@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 
 const gameRooms = new Map(); // roomCode => gameData
-const availableCategories = ["Animals", "Cars", "Fruits", "Movies", "Places","Cartoons","Foods","Players","Sports","Teams"];
+const availableCategories = ["Animals", "Cars", "Fruits", "Movies", "Places", "Cartoons", "Foods", "Players", "Sports", "Teams"];
 
 // 🔁 Get random images from category
 function getRandomImages(category, count) {
@@ -22,39 +22,6 @@ function getNextCategory(used) {
   return unused[Math.floor(Math.random() * unused.length)];
 }
 
-// 🔁 Start new game session
-export function startGame(roomCode) {
-  const category = getNextCategory([]);
-  if (!category) return null;
-
-  const allImages = getRandomImages(category, 6);
-  if (!allImages || allImages.length < 4) return null;
-
-  const selectedImages = allImages.slice(0, 4);
-  const trap = pickTrap(selectedImages);
-
-  gameRooms.set(roomCode, {
-    round: 1,
-    players: [],
-    usedCategories: [category],
-    category,
-    images: selectedImages,
-    trap,
-    choices: {},
-    scores: {},
-    revealedChoices: [],
-    finished: false
-  });
-
-  startTimer(roomCode); // ✅ Start round timer
-
-  return {
-    images: selectedImages,
-    category,
-    trap: null // ⛔ Don't reveal trap to client
-  };
-}
-
 // 👥 Set initial players
 export function setPlayers(roomCode, players) {
   const room = gameRooms.get(roomCode);
@@ -62,6 +29,22 @@ export function setPlayers(roomCode, players) {
     room.players = players;
     players.forEach(p => {
       room.scores[p.name] = 0;
+    });
+  } else {
+    // initialize room if not present
+    gameRooms.set(roomCode, {
+      round: 0,
+      players,
+      usedCategories: [],
+      scores: {},
+      choices: {},
+      revealedChoices: [],
+      finished: false
+    });
+
+    const newRoom = gameRooms.get(roomCode);
+    players.forEach(p => {
+      newRoom.scores[p.name] = 0;
     });
   }
 }

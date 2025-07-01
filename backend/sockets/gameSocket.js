@@ -1,6 +1,5 @@
 // backend/sockets/gameSocket.js
 import {
-  startGame,
   setPlayers,
   submitChoice,
   nextRound,
@@ -47,19 +46,22 @@ export function registerSocketHandlers(io) {
       const room = activeRooms.get(roomCode);
       if (!room) return;
 
+      // 1. Set players in gameManager
       const players = room.players;
       setPlayers(roomCode, players);
-      const game = startGame(roomCode);
-      if (!game) {
+
+      // 2. Start first round directly using nextRound()
+      const result = nextRound(roomCode);
+      if (!result) {
         io.to(roomCode).emit("game-error", { message: "Failed to start game." });
         return;
       }
 
-      const { images, category } = game;
-      io.to(roomCode).emit("game-started", {
-        round: 1,
-        images,
-        category,
+      // 3. Emit new-round to all players
+      io.to(roomCode).emit("new-round", {
+        round: result.round,
+        images: result.images,
+        category: result.category,
       });
     });
 

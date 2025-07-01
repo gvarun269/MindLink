@@ -32,15 +32,6 @@ export default function Game() {
 
   // Socket Events
   useEffect(() => {
-    socket.on("game-started", ({ round, images, category }) => {
-      setRound(round);
-      setImages(images.slice(0, 4));
-      setCategory(category);
-      setReveal(false);
-      setSelected(null);
-      setTimer(15);
-    });
-
     socket.on("new-round", ({ round, images, category }) => {
       setRound(round);
       setImages(images.slice(0, 4));
@@ -62,7 +53,6 @@ export default function Game() {
     });
 
     return () => {
-      socket.off("game-started");
       socket.off("new-round");
       socket.off("reveal-round");
       socket.off("game-over");
@@ -100,22 +90,22 @@ export default function Game() {
         <div className="progress-tracker">
           <div className="round-indicator">
             <span className="round-number">{round}</span>
-            <span className="round-label">/ 10 ROUND</span>
+            <span className="round-label">/ 5 ROUND</span>
           </div>
           <div className="progress-bar">
-            <div 
-              className="progress-fill" 
+            <div
+              className="progress-fill"
               style={{ width: `${(round / 5) * 100}%` }}
             ></div>
           </div>
         </div>
-        
+
         <div className="game-info">
           <div className="category-chip">
             <span className="category-icon">📂</span>
             <span className="category-name">{category?.toUpperCase()}</span>
           </div>
-          
+
           <div className={`timer-display ${timer <= 5 ? "warning" : ""}`}>
             <div className="timer-icon">⏱️</div>
             <div className="timer-value">{timer}s</div>
@@ -158,7 +148,8 @@ export default function Game() {
                 <div key={idx} className="choice-item">
                   <span className="player-icon">👤</span>
                   <span className="player-choice">
-                    {player === playerName ? "You" : "Someone"} picked: {img.replace(/\.[^/.]+$/, "")}
+                    {player === playerName ? "You" : player} picked:{" "}
+                    {img.replace(/\.[^/.]+$/, "")}
                   </span>
                 </div>
               ))}
