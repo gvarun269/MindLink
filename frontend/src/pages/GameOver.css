@@ -79,7 +79,7 @@
   grid-template-columns: 80px 1fr 120px;
   align-items: center;
   padding: 1rem;
-  background: white;
+  background: rgb(91, 217, 106);
   border-bottom: 1px solid #eee;
   transition: all 0.3s ease;
 }
@@ -89,7 +89,7 @@
 }
 
 .leaderboard-item.first-place {
-  background: #fff9e6;
+  background: #6fe1f8;
 }
 
 .player-rank {
@@ -106,7 +106,7 @@
 }
 
 .first-place .rank-number {
-  color: #ffc107;
+  color: #060604;
 }
 
 .crown-icon {
@@ -147,11 +147,11 @@
 .score-value {
   font-size: 1.3rem;
   font-weight: 700;
-  color: #4a6bff;
+  color: #f5f6fa;
 }
 
 .first-place .score-value {
-  color: #ffc107;
+  color: hwb(40 98% 0% / 0.953);
 }
 
 .score-label {

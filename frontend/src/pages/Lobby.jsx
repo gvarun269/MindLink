@@ -19,7 +19,8 @@ export default function Lobby() {
       }
     });
 
-    socket.on("game-started", ({ round, images, category }) => {
+    // ✅ Changed from "game-started" to "new-round"
+    socket.on("new-round", ({ round, images, category }) => {
       localStorage.setItem("round", round);
       localStorage.setItem("images", JSON.stringify(images));
       localStorage.setItem("category", category);
@@ -28,13 +29,13 @@ export default function Lobby() {
 
     return () => {
       socket.off("update-players");
-      socket.off("game-started");
+      socket.off("new-round"); // ✅ Clean up the new event
     };
   }, [navigate]);
 
   const handleStart = () => {
     socket.emit("start-game", {
-      roomCode: roomCode
+      roomCode: roomCode,
     });
   };
 

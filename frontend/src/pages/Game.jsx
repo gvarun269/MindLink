@@ -90,12 +90,12 @@ export default function Game() {
         <div className="progress-tracker">
           <div className="round-indicator">
             <span className="round-number">{round}</span>
-            <span className="round-label">/ 5 ROUND</span>
+            <span className="round-label">/ 10 ROUND</span>
           </div>
           <div className="progress-bar">
             <div
               className="progress-fill"
-              style={{ width: `${(round / 5) * 100}%` }}
+              style={{ width: `${(round / 10) * 100}%` }}
             ></div>
           </div>
         </div>

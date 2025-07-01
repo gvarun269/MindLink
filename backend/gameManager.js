@@ -95,7 +95,7 @@ export function nextRound(roomCode) {
   const room = gameRooms.get(roomCode);
   if (!room || room.finished) return null;
 
-  if (room.round >= 5) {
+  if (room.round >= 10) {
     room.finished = true;
     return { finished: true, scores: room.scores };
   }
